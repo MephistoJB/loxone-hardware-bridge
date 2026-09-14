@@ -62,6 +62,14 @@
           "unknown": "Unknown"
         }
       },
+      "update_mode": {
+        "name": "Update mode",
+        "state": {
+          "polled": "Polling",
+          "hybrid": "Hybrid",
+          "pushed": "Push"
+        }
+      },
       "battery": {"name": "Battery"},
       "hops": {"name": "Radio hops"},
       "quality_device": {"name": "Device radio quality"},
@@ -77,4 +85,3 @@
     }
   }
 }
-

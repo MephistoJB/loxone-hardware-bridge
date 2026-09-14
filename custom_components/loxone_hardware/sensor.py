@@ -16,6 +16,7 @@ from homeassistant.core import callback
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import LoxoneHardwareConfigEntry
+from .const import CONF_ENABLE_PUSH, DEFAULT_ENABLE_PUSH
 from .entity import LoxoneHardwareEntity
 from .models import WindowHandle
 
@@ -69,6 +70,58 @@ class LoxoneHandleSensor(LoxoneHardwareEntity, SensorEntity):
         if self._available_when_offline:
             return self.coordinator.last_update_success
         return super().available
+
+
+class LoxoneUpdateModeSensor(LoxoneHardwareEntity, SensorEntity):
+    """Show whether live handle values arrive through polling or push."""
+
+    _attr_translation_key = "update_mode"
+    _attr_device_class = SensorDeviceClass.ENUM
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_options: ClassVar[list[str]] = ["polled", "hybrid", "pushed"]
+    _attr_icon = "mdi:update"
+
+    def __init__(self, entry: LoxoneHardwareConfigEntry, device_id: str) -> None:
+        super().__init__(entry, device_id, "update_mode")
+
+    @property
+    def _push_connected(self) -> bool:
+        return bool(
+            self.entry.options.get(CONF_ENABLE_PUSH, DEFAULT_ENABLE_PUSH)
+            and self.coordinator.data.websocket_connected
+        )
+
+    @property
+    def native_value(self) -> str:
+        if not self._push_connected:
+            return "polled"
+        pushed_channels = sum(
+            (
+                bool(self.handle.push_position_uuid),
+                bool(self.handle.push_alarm_uuid),
+            )
+        )
+        if pushed_channels == 2:
+            return "pushed"
+        if pushed_channels == 1:
+            return "hybrid"
+        return "polled"
+
+    @property
+    def available(self) -> bool:
+        return self.coordinator.last_update_success
+
+    @property
+    def extra_state_attributes(self) -> dict[str, str | bool | None]:
+        position_push = self._push_connected and bool(self.handle.push_position_uuid)
+        vibration_push = self._push_connected and bool(self.handle.push_alarm_uuid)
+        return {
+            **super().extra_state_attributes,
+            "position_source": "push" if position_push else "polling",
+            "vibration_source": "push" if vibration_push else "polling",
+            "polling_fallback": True,
+            "websocket_connected": self.coordinator.data.websocket_connected,
+        }
 
 
 SENSOR_TYPES: tuple[
@@ -147,7 +200,12 @@ async def async_setup_entry(
         known.update(new_ids)
         entities: list[SensorEntity] = []
         for device_id in sorted(new_ids):
-            entities.append(LoxonePositionSensor(entry, device_id))
+            entities.extend(
+                (
+                    LoxonePositionSensor(entry, device_id),
+                    LoxoneUpdateModeSensor(entry, device_id),
+                )
+            )
             entities.extend(
                 LoxoneHandleSensor(entry, device_id, description, value_fn, offline)
                 for description, value_fn, offline in SENSOR_TYPES

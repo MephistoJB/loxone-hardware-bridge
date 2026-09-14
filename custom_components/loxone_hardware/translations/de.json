@@ -57,6 +57,10 @@
         "name": "Position",
         "state": {"closed": "Geschlossen", "tilted": "Gekippt", "open": "Geöffnet", "unknown": "Unbekannt"}
       },
+      "update_mode": {
+        "name": "Aktualisierungsmodus",
+        "state": {"polled": "Polling", "hybrid": "Hybrid", "pushed": "Push"}
+      },
       "battery": {"name": "Batterie"},
       "hops": {"name": "Funk-Hops"},
       "quality_device": {"name": "Funkqualität Gerät"},
@@ -72,4 +76,3 @@
     }
   }
 }
-

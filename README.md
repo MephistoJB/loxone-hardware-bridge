@@ -20,6 +20,7 @@ The first supported device is the **Loxone Window Handle Air**.
 - Fast HTTP polling that always remains active as a reliability fallback
 - UI configuration and reconfiguration of host, port and credentials
 - Configurable update intervals
+- Per-device update-mode sensor with separate position and vibration sources
 - Redacted Home Assistant diagnostics
 
 ## Installation with HACS
@@ -97,6 +98,7 @@ and does not present a stale position as live.
 Each Window Handle Air creates:
 
 - Position enum sensor
+- Update-mode sensor (`Polling`, `Hybrid` or `Push`)
 - Window binary sensor (on for tilted or open)
 - Vibration binary sensor
 - Battery sensor
@@ -107,6 +109,11 @@ Each Window Handle Air creates:
 - Radio-hop sensor
 
 The Air Base device also exposes the encrypted push-connection state.
+
+The update-mode sensor reports the effective source for the live position and
+vibration values. Its attributes show both channels separately, whether the
+WebSocket is connected and that polling remains enabled as a fallback. Battery,
+online state and radio diagnostics are always polled.
 
 ## Security
 
@@ -144,4 +151,3 @@ responses.
 ## License
 
 MIT
-
