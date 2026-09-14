@@ -21,6 +21,7 @@ The first supported device is the **Loxone Window Handle Air**.
 - UI configuration and reconfiguration of host, port and credentials
 - Configurable update intervals
 - Per-device update-mode sensor with separate position and vibration sources
+- Automatic synchronization of Loxone hardware names to HA devices
 - Redacted Home Assistant diagnostics
 
 ## Installation with HACS
@@ -109,6 +110,11 @@ Each Window Handle Air creates:
 - Radio-hop sensor
 
 The Air Base device also exposes the encrypted push-connection state.
+
+Hardware names are refreshed from Loxone during the regular status/discovery
+pull and then applied to the Home Assistant device registry. Existing entity
+IDs stay unchanged, so automations do not break. A device name set manually in
+Home Assistant remains the user-visible override.
 
 The update-mode sensor reports the effective source for the live position and
 vibration values. Its attributes show both channels separately, whether the

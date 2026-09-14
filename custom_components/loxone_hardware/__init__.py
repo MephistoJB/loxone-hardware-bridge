@@ -5,8 +5,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_PORT, CONF_USERNAME
-from homeassistant.core import HomeAssistant
+from homeassistant.const import (
+    CONF_HOST,
+    CONF_PASSWORD,
+    CONF_PORT,
+    CONF_USERNAME,
+    EVENT_HOMEASSISTANT_STOP,
+)
+from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.util import dt as dt_util
@@ -84,6 +90,14 @@ async def async_setup_entry(
         )
         await push_client.async_start()
 
+        async def async_stop_push(_event: Event) -> None:
+            """Close the WebSocket before Home Assistant's final shutdown stage."""
+            await push_client.async_stop()
+
+        entry.async_on_unload(
+            hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, async_stop_push)
+        )
+
     entry.runtime_data = LoxoneHardwareRuntimeData(
         api=api,
         coordinator=coordinator,
@@ -92,6 +106,26 @@ async def async_setup_entry(
     )
     entry.async_on_unload(entry.add_update_listener(_async_update_listener))
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
+    @callback
+    def async_sync_device_names() -> None:
+        """Keep integration-provided HA device names in sync with Loxone."""
+        data = coordinator.data
+        air_base = registry.async_get(air_base_device.id)
+        air_base_name = f"{data.miniserver_name} Air Base"
+        if air_base is not None and air_base.name != air_base_name:
+            registry.async_update_device(air_base.id, name=air_base_name)
+
+        for handle in data.handles.values():
+            device = registry.async_get_device(
+                identifiers={(DOMAIN, f"{entry.unique_id}:{handle.serial}")},
+                connections=set(),
+            )
+            if device is not None and device.name != handle.name:
+                registry.async_update_device(device.id, name=handle.name)
+
+    entry.async_on_unload(coordinator.async_add_listener(async_sync_device_names))
+    async_sync_device_names()
     return True
 
 
