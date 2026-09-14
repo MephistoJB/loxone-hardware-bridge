@@ -103,8 +103,6 @@ class LoxoneHardwareCoordinator(DataUpdateCoordinator[BridgeData]):
             if source_handle := source.handles.get(device_id):
                 target_handle.position = source_handle.position
                 target_handle.alarm = source_handle.alarm
-                target_handle.push_position_uuid = source_handle.push_position_uuid
-                target_handle.push_alarm_uuid = source_handle.push_alarm_uuid
 
     async def async_apply_push(self, values: dict[str, float]) -> None:
         """Apply relevant WebSocket values immediately."""
