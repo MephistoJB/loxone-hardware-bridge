@@ -7,7 +7,7 @@ import logging
 import re
 import xml.etree.ElementTree as ET
 from copy import deepcopy
-from datetime import datetime, timezone
+from datetime import datetime, timezone, tzinfo
 from typing import Any
 from urllib.parse import quote
 
@@ -73,24 +73,35 @@ def _as_bool(value: str | None) -> bool | None:
     return bool(number) if number is not None else None
 
 
-def _parse_datetime(value: str | None) -> datetime | None:
+def _parse_datetime(value: str | None, local_timezone: tzinfo) -> datetime | None:
     if not value:
         return None
     try:
         return datetime.strptime(value, "%Y-%m-%d %H:%M:%S").replace(
-            tzinfo=timezone.utc
+            tzinfo=local_timezone
         )
     except ValueError:
         return None
 
 
 def parse_status_xml(
-    xml: str, miniserver_serial: str, air_base_hint: str
+    xml: str,
+    miniserver_serial: str,
+    air_base_hint: str,
+    local_timezone: tzinfo = timezone.utc,
 ) -> BridgeData:
     """Parse Loxone /data/status XML."""
     root = ET.fromstring(xml)
     miniserver = root.find(".//Miniserver")
-    extension = root.find(".//Extension[@Type='Air Base']")
+    extension = next(
+        (
+            item
+            for item in root.findall(".//Extension")
+            if item.attrib.get("Serial", "").upper() == air_base_hint.upper()
+            or "air base" in item.attrib.get("Type", "").casefold()
+        ),
+        None,
+    )
     miniserver_name = (
         miniserver.attrib.get("Name", "Loxone Miniserver")
         if miniserver is not None
@@ -133,7 +144,9 @@ def parse_status_xml(
                 if "BattWeak" in element.attrib
                 else None
             ),
-            last_received=_parse_datetime(element.attrib.get("LastReceived")),
+            last_received=_parse_datetime(
+                element.attrib.get("LastReceived"), local_timezone
+            ),
             firmware=element.attrib.get("Version"),
             hardware_version=element.attrib.get("HwVersion"),
             hops=_as_int(element.attrib.get("Hops")),
@@ -215,6 +228,7 @@ class LoxoneHardwareApi:
         password: str,
         use_ssl: bool,
         verify_ssl: bool,
+        local_timezone: tzinfo = timezone.utc,
     ) -> None:
         self.session = session
         self.host = host
@@ -223,6 +237,7 @@ class LoxoneHardwareApi:
         self.password = password
         self.use_ssl = use_ssl
         self.verify_ssl = verify_ssl
+        self.local_timezone = local_timezone
         scheme = "https" if use_ssl else "http"
         default_port = 443 if use_ssl else 80
         port_part = "" if port == default_port else f":{port}"
@@ -282,7 +297,10 @@ class LoxoneHardwareApi:
         self.miniserver_serial = serial
         self.air_base = air_base
         data = parse_status_xml(
-            await self._request_text("data/status"), serial, air_base
+            await self._request_text("data/status"),
+            serial,
+            air_base,
+            self.local_timezone,
         )
         if not data.handles:
             raise LoxoneNoDevicesError("No Loxone Window Handle Air devices found")
@@ -308,6 +326,7 @@ class LoxoneHardwareApi:
             await self._request_text("data/status"),
             self.miniserver_serial,
             self.air_base,
+            self.local_timezone,
         )
 
     async def async_read_channel(self, handle: WindowHandle, channel: str) -> str:

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from datetime import timezone
 from typing import Any, ClassVar
 
 from homeassistant.components.sensor import (
@@ -125,11 +124,7 @@ SENSOR_TYPES: tuple[
             device_class=SensorDeviceClass.TIMESTAMP,
             entity_category=EntityCategory.DIAGNOSTIC,
         ),
-        lambda handle: (
-            handle.last_received.replace(tzinfo=timezone.utc)
-            if handle.last_received and handle.last_received.tzinfo is None
-            else handle.last_received
-        ),
+        lambda handle: handle.last_received,
         True,
     ),
 )

@@ -17,6 +17,7 @@ from homeassistant.helpers.selector import (
     TextSelectorConfig,
     TextSelectorType,
 )
+from homeassistant.util import dt as dt_util
 
 from .api import (
     LoxoneAuthenticationError,
@@ -86,6 +87,7 @@ async def _validate_input(hass, user_input: dict[str, Any]):
         password=user_input[CONF_PASSWORD],
         use_ssl=user_input[CONF_USE_SSL],
         verify_ssl=user_input[CONF_VERIFY_SSL],
+        local_timezone=dt_util.get_time_zone(hass.config.time_zone) or dt_util.UTC,
     )
     return await api.async_validate()
 

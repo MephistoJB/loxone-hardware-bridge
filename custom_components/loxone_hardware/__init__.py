@@ -9,6 +9,7 @@ from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_PORT, CONF_USERNA
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.util import dt as dt_util
 
 from .api import LoxoneHardwareApi
 from .const import (
@@ -52,6 +53,7 @@ async def async_setup_entry(
         password=entry.data[CONF_PASSWORD],
         use_ssl=entry.data.get(CONF_USE_SSL, DEFAULT_USE_SSL),
         verify_ssl=entry.data.get(CONF_VERIFY_SSL, DEFAULT_VERIFY_SSL),
+        local_timezone=dt_util.get_time_zone(hass.config.time_zone) or dt_util.UTC,
     )
     initial_data, push_mapping = await api.async_discover()
     coordinator = LoxoneHardwareCoordinator(
