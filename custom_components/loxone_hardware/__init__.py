@@ -117,9 +117,8 @@ async def async_setup_entry(
             registry.async_update_device(air_base.id, name=air_base_name)
 
         for handle in data.handles.values():
-            device = registry.async_get_device(
-                identifiers={(DOMAIN, f"{entry.unique_id}:{handle.serial}")},
-                connections=set(),
+            device = registry.async_get_device_by_identifier(
+                (DOMAIN, f"{entry.unique_id}:{handle.serial}")
             )
             if device is not None and device.name != handle.name:
                 registry.async_update_device(device.id, name=handle.name)
