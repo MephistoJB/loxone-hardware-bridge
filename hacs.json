@@ -1,0 +1,7 @@
+{
+  "name": "Loxone Hardware Bridge",
+  "content_in_root": false,
+  "render_readme": true,
+  "homeassistant": "2026.8.0"
+}
+

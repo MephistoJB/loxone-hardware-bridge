@@ -1,0 +1,75 @@
+{
+  "title": "Loxone Hardware Bridge",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Mit einem Loxone Miniserver verbinden",
+        "description": "Die Zugangsdaten werden geschützt in Home Assistant gespeichert und ausschließlich für die lokale Verbindung zum Miniserver verwendet.",
+        "data": {
+          "host": "Host oder IP-Adresse",
+          "port": "Port",
+          "username": "Benutzername",
+          "password": "Passwort",
+          "use_ssl": "HTTPS/WSS verwenden",
+          "verify_ssl": "TLS-Zertifikat prüfen"
+        }
+      },
+      "reconfigure": {
+        "title": "Miniserver-Verbindung neu konfigurieren",
+        "description": "Gib alle Verbindungsdaten erneut ein. Das Passwort wird niemals angezeigt.",
+        "data": {
+          "host": "Host oder IP-Adresse",
+          "port": "Port",
+          "username": "Benutzername",
+          "password": "Passwort",
+          "use_ssl": "HTTPS/WSS verwenden",
+          "verify_ssl": "TLS-Zertifikat prüfen"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Verbindung zum Miniserver fehlgeschlagen",
+      "invalid_auth": "Benutzername oder Passwort ist ungültig",
+      "no_devices": "Es wurden keine Loxone Fenstergriff-Air-Geräte gefunden"
+    },
+    "abort": {
+      "already_configured": "Dieser Miniserver ist bereits konfiguriert",
+      "unique_id_mismatch": "Die neue Verbindung verweist auf einen anderen Miniserver"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Aktualisierungsmechanismen",
+        "description": "Push wird verwendet, wenn ein physischer Eingang eine passende Status-UUID besitzt. Polling bleibt als zuverlässige Rückfallebene immer aktiv.",
+        "data": {
+          "enable_push": "WebSocket-Push aktivieren",
+          "fast_poll_interval": "Intervall für Position und Erschütterung",
+          "status_interval": "Intervall für Gerätesuche und Online-Status",
+          "battery_interval": "Intervall für Batteriewerte"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "position": {
+        "name": "Position",
+        "state": {"closed": "Geschlossen", "tilted": "Gekippt", "open": "Geöffnet", "unknown": "Unbekannt"}
+      },
+      "battery": {"name": "Batterie"},
+      "hops": {"name": "Funk-Hops"},
+      "quality_device": {"name": "Funkqualität Gerät"},
+      "quality_extension": {"name": "Funkqualität Air Base"},
+      "last_received": {"name": "Zuletzt empfangen"}
+    },
+    "binary_sensor": {
+      "window": {"name": "Fenster"},
+      "vibration": {"name": "Erschütterung"},
+      "battery_low": {"name": "Batterie schwach"},
+      "online": {"name": "Online"},
+      "push_connection": {"name": "Push-Verbindung"}
+    }
+  }
+}
+

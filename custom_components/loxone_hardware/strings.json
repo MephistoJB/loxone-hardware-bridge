@@ -1,0 +1,80 @@
+{
+  "title": "Loxone Hardware Bridge",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to a Loxone Miniserver",
+        "description": "The credentials are stored securely in Home Assistant and are used only for the local Miniserver connection.",
+        "data": {
+          "host": "Host or IP address",
+          "port": "Port",
+          "username": "Username",
+          "password": "Password",
+          "use_ssl": "Use HTTPS/WSS",
+          "verify_ssl": "Verify TLS certificate"
+        }
+      },
+      "reconfigure": {
+        "title": "Reconfigure Miniserver connection",
+        "description": "Enter all connection details again. The password is never displayed.",
+        "data": {
+          "host": "Host or IP address",
+          "port": "Port",
+          "username": "Username",
+          "password": "Password",
+          "use_ssl": "Use HTTPS/WSS",
+          "verify_ssl": "Verify TLS certificate"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not connect to the Miniserver",
+      "invalid_auth": "Invalid username or password",
+      "no_devices": "No Loxone Window Handle Air devices were found"
+    },
+    "abort": {
+      "already_configured": "This Miniserver is already configured",
+      "unique_id_mismatch": "The new connection points to a different Miniserver"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Update mechanisms",
+        "description": "Push is used where a physical input has a matching state UUID. Polling always remains active as a reliability fallback.",
+        "data": {
+          "enable_push": "Enable WebSocket push",
+          "fast_poll_interval": "Position and vibration polling interval",
+          "status_interval": "Device discovery and online-status interval",
+          "battery_interval": "Battery polling interval"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "position": {
+        "name": "Position",
+        "state": {
+          "closed": "Closed",
+          "tilted": "Tilted",
+          "open": "Open",
+          "unknown": "Unknown"
+        }
+      },
+      "battery": {"name": "Battery"},
+      "hops": {"name": "Radio hops"},
+      "quality_device": {"name": "Device radio quality"},
+      "quality_extension": {"name": "Air Base radio quality"},
+      "last_received": {"name": "Last received"}
+    },
+    "binary_sensor": {
+      "window": {"name": "Window"},
+      "vibration": {"name": "Vibration"},
+      "battery_low": {"name": "Battery low"},
+      "online": {"name": "Online"},
+      "push_connection": {"name": "Push connection"}
+    }
+  }
+}
+
