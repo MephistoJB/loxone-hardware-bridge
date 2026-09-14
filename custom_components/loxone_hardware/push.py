@@ -120,7 +120,8 @@ class LoxonePushClient:
             except asyncio.CancelledError:
                 raise
             except Exception as err:  # noqa: BLE001 - reconnect boundary
-                _LOGGER.warning("Loxone push connection failed: %s", err)
+                if not self._stop.is_set():
+                    _LOGGER.warning("Loxone push connection failed: %s", err)
             finally:
                 await self._set_connected(False)
                 if self._ws and not self._ws.closed:
