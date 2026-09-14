@@ -118,7 +118,7 @@ async def async_setup_entry(
 
         for handle in data.handles.values():
             device = registry.async_get_device_by_identifier(
-                (DOMAIN, f"{entry.unique_id}:{handle.serial}")
+                (DOMAIN, f"{entry.unique_id}:{handle.serial}"), entry.entry_id
             )
             if device is not None and device.name != handle.name:
                 registry.async_update_device(device.id, name=handle.name)
